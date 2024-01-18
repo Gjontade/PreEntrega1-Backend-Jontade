@@ -19,24 +19,42 @@ class productManager {
 		stock,
 		status = true
 	) => {
-		// El bucle for, me permite saber si el atributo code de cada producto es repetido, de ser asi no lo agrega a la lista.
+		// El bucle for me permite saber si el atributo code de cada producto es repetido, de ser así no lo agrega a la lista.
 		for (let i = 0; i < this.products.length; i++) {
 			if (this.products[i].code === code) {
-				console.log(`Error, code ${code} esta repetido.`);
+				console.log(`Error, code ${code} está repetido.`);
 				return;
 			}
 		}
 
-		const newProduct = {title, description, price, thumbnail, code, stock, status};
+		const newProduct = {
+			title: title,
+			description: description,
+			price: price,
+			thumbnail: thumbnail,
+			code: code,
+			stock: stock,
+			status: status,
+		};
 
 		// Comprueba que todos los campos sean obligatorios.
 		if (!Object.values(newProduct).includes(undefined)) {
 			productManager.id++; // Con cada producto nuevo, aumenta el ID en uno, de esta forma no se repiten.
-			this.products.push({
-				...newProduct,
-				id: productManager.id,
-			});
-			await fs.promises.writeFile(this.path, JSON.stringify(this.products));
+
+			// Lee la lista actual de productos desde el archivo
+			let currentProducts = await this.getProducts();
+
+			// Agrega el nuevo producto a la lista
+			const updatedProducts = [
+				...currentProducts,
+				{...newProduct, id: productManager.id},
+			];
+
+			// Actualiza la lista completa en memoria
+			this.products = updatedProducts;
+
+			// Actualiza el archivo JSON con la lista de productos completa
+			await fs.promises.writeFile(this.path, JSON.stringify(updatedProducts));
 		} else {
 			console.log("Todos los campos son obligatorios.");
 		}
